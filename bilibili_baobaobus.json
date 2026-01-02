@@ -1,0 +1,131 @@
+{
+  "name": "B站宝宝巴士专属源（防限流版）",
+  "type": "bilibili",
+  "version": "2.0.0",
+  "updateTime": "2026-01-02",
+  "author": "自定义部署",
+  "headers": {
+    "User-Agent": "Mozilla/5.0 (Linux; Android 10; TCL TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Referer": "https://www.bilibili.com",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "zh-CN,zh;q=0.9",
+    "Cookie": "SESSDATA=4bff45af%2C1782370730%2C3c3e0%2Ac1CjCSYhZcF5B_73dimPfa9N55aYvd93qv65IZGQ6x5v0qzWjc_pYsfxmr3abPKMvfD9cSVjJxcWM3U2NOcEN6TmRZTm9MRnVSRW5CaWFndzdPWFIxRVZHcGEwUE9sZm10WE8wZGtFa1FEN2lubWVuRWRMWE5zODZpRzFvV1hYNWxJNzZVQXJvd2VBIIEC; bili_jct=f7b37679501d4adf29e24205f3cd7bb7; DedeUserID=514021542; DedeUserID__ckMd5=22980ee3c1cc78c9", // 关键：添加登录态Cookie
+    "Origin": "https://www.bilibili.com",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-site"
+  },
+  "cache": { // 新增缓存机制，减少重复请求
+    "enable": true,
+    "expire": 3600, // 缓存1小时（单位：秒），可调整
+    "key": "baobaobus_cache"
+  },
+  "sources": [
+    {
+      "id": "baobaobus_official",
+      "name": "宝宝巴士官方账号",
+      "url": "https://api.bilibili.com/x/v2/space/arc/search?mid=342220554&ps=30&tid=0&pn={page}&keyword=&order=pubdate&platform=web", // 切换新接口x/v2/
+      "page": {
+        "start": 1,
+        "step": 1,
+        "end": 5 // 减少分页（从10页改为5页），降低请求频率
+      },
+      "list": "$.data.list.vlist[*]",
+      "title": "$.title",
+      "url": "https://www.bilibili.com/video/av{aid}",
+      "cover": "$.pic",
+      "duration": "$.length",
+      "date": "$.created",
+      "author": "$.author",
+      "desc": "$.description"
+    },
+    {
+      "id": "baobaobus_songs",
+      "name": "宝宝巴士儿歌专区",
+      "url": "https://api.bilibili.com/x/v2/space/arc/search?mid=174989992&ps=30&tid=0&pn={page}&keyword=&order=pubdate&platform=web",
+      "page": {
+        "start": 1,
+        "step": 1,
+        "end": 5
+      },
+      "list": "$.data.list.vlist[*]",
+      "title": "$.title",
+      "url": "https://www.bilibili.com/video/av{aid}",
+      "cover": "$.pic",
+      "duration": "$.length",
+      "date": "$.created",
+      "author": "$.author",
+      "desc": "$.description"
+    },
+    {
+      "id": "baobaobus_animation",
+      "name": "宝宝巴士动画专区",
+      "url": "https://api.bilibili.com/x/v2/space/arc/search?mid=288401910&ps=30&tid=0&pn={page}&keyword=&order=pubdate&platform=web",
+      "page": {
+        "start": 1,
+        "step": 1,
+        "end": 5
+      },
+      "list": "$.data.list.vlist[*]",
+      "title": "$.title",
+      "url": "https://www.bilibili.com/video/av{aid}",
+      "cover": "$.pic",
+      "duration": "$.length",
+      "date": "$.created",
+      "author": "$.author",
+      "desc": "$.description"
+    },
+    {
+      "id": "baobaobus_search",
+      "name": "宝宝巴士关键词搜索",
+      "url": "https://api.bilibili.com/x/web-interface/search/all/v2?keyword=宝宝巴士&page={page}&pagesize=30&order=pubdate&platform=web",
+      "page": {
+        "start": 1,
+        "step": 1,
+        "end": 3 // 进一步减少搜索接口分页
+      },
+      "list": "$.data.result[?(@.result_type=='video')].data[*]",
+      "title": "$.title",
+      "url": "https://www.bilibili.com/video/BV{mid}",
+      "cover": "$.pic",
+      "duration": "$.duration",
+      "date": "$.pubdate",
+      "author": "$.author",
+      "desc": "$.desc"
+    }
+  ],
+  "parser": {
+    "name": "B站视频解析（防限流）",
+    "type": "json",
+    "videoUrl": "https://api.bilibili.com/x/player/playurl?aid={aid}&cid={cid}&qn=64&type=&otype=json&fnver=0&fnval=4048&platform=web", // qn=64（720P，降低解析请求压力）
+    "headers": {
+      "Cookie": "SESSDATA=4bff45af%2C1782370730%2C3c3e0%2Ac1CjCSYhZcF5B_73dimPfa9N55aYvd93qv65IZGQ6x5v0qzWjc_pYsfxmr3abPKMvfD9cSVjJxcWM3U2NOcEN6TmRZTm9MRnVSRW5CaWFndzdPWFIxRVZHcGEwUE9sZm10WE8wZGtFa1FEN2lubWVuRWRMWE5zODZpRzFvV1hYNWxJNzZVQXJvd2VBIIEC; bili_jct=f7b37679501d4adf29e24205f3cd7bb7" // 解析接口也添加登录态
+    },
+    "videoList": "$.data.durl[*].url",
+    "audioList": "$.data.durl[*].url",
+    "quality": {
+      "720P": 64,
+      "480P": 32,
+      "360P": 16
+    },
+    "retry": 3, // 失败自动重试3次
+    "delay": 1000 // 重试间隔1秒（单位：毫秒）
+  },
+  "categories": [
+    {
+      "name": "宝宝巴士官方",
+      "sourceId": "baobaobus_official"
+    },
+    {
+      "name": "儿歌精选",
+      "sourceId": "baobaobus_songs"
+    },
+    {
+      "name": "动画专区",
+      "sourceId": "baobaobus_animation"
+    },
+    {
+      "name": "全部内容",
+      "sourceId": "baobaobus_search"
+    }
+  ]
+}
